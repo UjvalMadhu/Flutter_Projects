@@ -45,40 +45,94 @@ class MyAppState extends ChangeNotifier {
 
 }
 
-class MyHomePage extends StatelessWidget {
+
+
+
+
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      body: Row(
+        children: [
+          SafeArea(
+            child: NavigationRail(
+                extended: false,
+                destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home), 
+                    label: Text('Home'),
+                    ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.favorite),
+                    label: Text('Favorites'),
+                    ),
+                ],
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (value){
+                  print('Selected: $value');
+                },
+              ),
+            ),
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: GeneratorPage(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }  
+}
+
+class GeneratorPage extends StatelessWidget { 
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            BigCard(pair: pair),
-        
-            SizedBox(height: 10,),
+    IconData icon;
+    if(appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    }else {
+      icon = Icons.favorite_border;
+    }
+    
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BigCard(pair: pair),
+      
+          SizedBox(height: 10,),
 
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: (){
-                    appState.toggleFavorite();
-                  }, child: Text('❤️ Like')),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: (){
+                  appState.toggleFavorite();
+                }, child: Text('❤️ Like')),
 
-                SizedBox(width: 10),
+              SizedBox(width: 10),
 
-                ElevatedButton(
-                  onPressed: (){
-                    appState.getNext();
-                  }, 
-                  child: Text('Next')),
-              ],
-            )
-          ],
-        ),
+              ElevatedButton(
+                onPressed: (){
+                  appState.getNext();
+                }, 
+                child: Text('Next')),
+            ],
+          )
+        ],
       ),
     );
   }
