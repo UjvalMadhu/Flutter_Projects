@@ -45,7 +45,33 @@ class MyAppState extends ChangeNotifier {
 
 }
 
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
 
+    if (appState.favorites.isEmpty) {
+      return Center(
+        child: Text('No favorites yet.'),
+      );
+    }
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
+        ),
+        for (var pair in appState.favorites)
+          ListTile(
+            leading: Icon(Icons.favorite),
+            title: Text(pair.asLowerCase),
+          ),
+      ],
+    );
+  }
+}
 
 
 
@@ -55,43 +81,58 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   var selectedIndex = 0;
 
   @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      body: Row(
-        children: [
-          SafeArea(
-            child: NavigationRail(
-                extended: false,
+  Widget build(BuildContext context) {
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = FavoritesPage();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                extended: constraints.maxWidth >= 600,  // ← Here.
                 destinations: [
                   NavigationRailDestination(
-                    icon: Icon(Icons.home), 
+                    icon: Icon(Icons.home),
                     label: Text('Home'),
-                    ),
+                  ),
                   NavigationRailDestination(
                     icon: Icon(Icons.favorite),
                     label: Text('Favorites'),
-                    ),
+                  ),
                 ],
                 selectedIndex: selectedIndex,
-                onDestinationSelected: (value){
-                  print('Selected: $value');
+                onDestinationSelected: (value) {
+                  setState(() {
+                    selectedIndex = value;
+                  });
                 },
               ),
             ),
             Expanded(
               child: Container(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                child: GeneratorPage(),
+                child: page,
               ),
             ),
-        ],
-      ),
-    );
-  }  
+          ],
+        ),
+      );
+    });
+  }
 }
 
 class GeneratorPage extends StatelessWidget { 
@@ -167,3 +208,5 @@ class BigCard extends StatelessWidget {
     );
   }
 }
+
+
